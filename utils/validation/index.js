@@ -1,9 +1,12 @@
-const { contactValidationSchema } = require("./contactsValidationSchemas");
 const {
+  contactValidationSchema,
   updateContactStatusValidationSchemas,
-} = require("./updateContactStatusValidationSchemas");
+} = require("./contactsValidationSchemas");
+
+const { userValidationSchema } = require("./userValidationSchemas");
 
 module.exports = {
   contactValidationSchema,
   updateContactStatusValidationSchemas,
+  userValidationSchema,
 };
