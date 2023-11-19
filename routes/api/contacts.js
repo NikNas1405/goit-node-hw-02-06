@@ -1,22 +1,36 @@
 const express = require("express");
+
 const router = express.Router();
+
 const jsonParser = express.json();
 
-const ContactsControllers = require("../../controllers/controllers");
+const ContactsControllers = require("../../controllers/сontacts.controllers");
+const { validateBody } = require("../../utils/validateBody");
 
-router.get("/", ContactsControllers.listContacts);
+const {
+  contactValidationSchema,
+  updateContactStatusValidationSchemas,
+} = require("../../utils/validation/index");
 
-router.get("/:contactId", ContactsControllers.getContactById);
+router
+  .route("/")
+  .get(ContactsControllers.listContacts)
+  .post(
+    jsonParser,
+    validateBody(contactValidationSchema),
+    ContactsControllers.addContact
+  );
 
-router.post("/", jsonParser, ContactsControllers.addContact);
-
-router.delete("/:contactId", ContactsControllers.removeContact);
-
-router.put("/:contactId", jsonParser, ContactsControllers.updateContact);
+router
+  .route("/:contactId")
+  .get(ContactsControllers.getContactById)
+  .delete(ContactsControllers.removeContact)
+  .put(jsonParser, ContactsControllers.updateContact);
 
 router.patch(
   "/:contactId/favorite",
   jsonParser,
+  validateBody(updateContactStatusValidationSchemas),
   ContactsControllers.updateStatusContact
 );
 
