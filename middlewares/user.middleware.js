@@ -5,7 +5,8 @@ const User = require("../models/user.model");
 const { HttpError } = require("../utils/HttpError");
 
 const userMiddleware = async (req, res, next) => {
-  const userAuthHeader = req.headers["authorization"];
+  // const userAuthHeader = req.headers["authorization"];
+  const userAuthHeader = req.headers.authorization;
 
   if (typeof userAuthHeader === "undefined") {
     return next(new HttpError(401, "Not authorized"));
@@ -14,7 +15,7 @@ const userMiddleware = async (req, res, next) => {
   const [bearer, token] = userAuthHeader.split(" ", 2);
 
   if (bearer !== "Bearer") {
-    next(new HttpError(401, "Not authorized"));
+    return next(new HttpError(401, "Not authorized"));
   }
 
   jwt.verify(token, process.env.JWT_SECRET, async (err, decode) => {
@@ -43,31 +44,3 @@ const userMiddleware = async (req, res, next) => {
 };
 
 module.exports = userMiddleware;
-
-// const { SECRET_KEY } = process.env;
-
-// const userMiddleware = async (req, res, next) => {
-//   const { authorization = "" } = req.headers;
-
-//   const [bearer, token] = authorization.split(" ");
-
-//   if (bearer !== "Bearer") {
-//     next(new HttpError(401, "Not authorized"));
-//   }
-//   try {
-//     const { id } = jwt.verify(token, SECRET_KEY);
-
-//     const user = await User.findById(id);
-
-//     if (!user || !user.token || user.token !== token) {
-//       next(new HttpError(401, "Not authorized"));
-//     }
-
-//     req.user = user;
-//     next();
-//   } catch {
-//     next(new HttpError(401, "Not authorized"));
-//   }
-// };
-
-// module.exports = { userMiddleware };

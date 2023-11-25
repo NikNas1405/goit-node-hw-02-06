@@ -2,7 +2,7 @@ const express = require("express");
 
 const router = express.Router();
 
-const  userMiddleware  = require("../../middlewares/user.middleware");
+const userMiddleware = require("../../middlewares/user.middleware");
 
 const { authRouter } = require("./users");
 const { contactsRouter } = require("./contacts");

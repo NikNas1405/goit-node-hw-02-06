@@ -4,6 +4,7 @@ const {
   loginServices,
   logoutServices,
   getCurrentServices,
+  uploadAvatarServices,
 } = require("../services/users.services");
 
 const register = controllerWrapper(async (req, res, next) => {
@@ -12,17 +13,16 @@ const register = controllerWrapper(async (req, res, next) => {
     user: {
       email: user.email,
       subscription: user.subscription,
+      avatarURL: user.avatarURL,
     },
   });
 });
 
 const login = controllerWrapper(async (req, res, next) => {
-  const currentUser = await loginServices(req.body);
-
-  console.log(currentUser);
+  const { currentUser, token } = await loginServices(req.body);
 
   res.status(200).json({
-    token: currentUser.token,
+    token,
     user: {
       email: currentUser.email,
       subscription: currentUser.subscription,
@@ -38,10 +38,16 @@ const logout = async (req, res, next) => {
 
 const getCurrent = controllerWrapper(async (req, res, next) => {
   const user = await getCurrentServices(req.user);
-  console.log(user);
   res.status(200).json({
     email: user.email,
     subscription: user.subscription,
+  });
+});
+
+const uploadAvatar = controllerWrapper(async (req, res, next) => {
+  const updatedUser = await uploadAvatarServices(req.user, req.file);
+  res.status(200).json({
+    avatarURL: updatedUser.avatarURL,
   });
 });
 
@@ -50,4 +56,5 @@ module.exports = {
   login,
   logout,
   getCurrent,
+  uploadAvatar,
 };
