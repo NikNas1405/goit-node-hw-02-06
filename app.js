@@ -1,6 +1,7 @@
 require("dotenv").config();
 require("./server.js");
 
+const path = require("node:path");
 const express = require("express");
 const logger = require("morgan");
 const cors = require("cors");
@@ -14,6 +15,7 @@ const formatsLogger = app.get("env") === "development" ? "dev" : "short";
 app.use(logger(formatsLogger));
 app.use(cors());
 
+app.use("/avatars", express.static(path.join(__dirname, "public/avatars")));
 app.use("/api", routes);
 
 app.use((req, res) => {

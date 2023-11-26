@@ -1,6 +1,6 @@
 const express = require("express");
 
-const AuthController = require("../../controllers/users.controllers");
+const AuthUserController = require("../../controllers/users.controllers");
 const { validateBody } = require("../../utils/validateBody");
 const { userValidationSchema } = require("../../utils/validation");
 const router = express.Router();
@@ -8,25 +8,31 @@ const router = express.Router();
 const jsonParser = express.json();
 
 const userMiddleware = require("../../middlewares/user.middleware");
+const upload = require("../../middlewares/upload.middleware");
 
 router.post(
   "/register",
   jsonParser,
   validateBody(userValidationSchema),
-  AuthController.register
+  AuthUserController.register
 );
 
 router.post(
   "/login",
   jsonParser,
   validateBody(userValidationSchema),
-  AuthController.login
+  AuthUserController.login
 );
 
-router.post("/logout", userMiddleware, AuthController.logout);
+router.post("/logout", userMiddleware, AuthUserController.logout);
 
-router.get("/current", userMiddleware, AuthController.getCurrent);
+router.get("/current", userMiddleware, AuthUserController.getCurrent);
 
-
+router.patch(
+  "/avatars",
+  upload.single("avatarURL"),
+  userMiddleware,
+  AuthUserController.uploadAvatar
+);
 
 module.exports = { authRouter: router };

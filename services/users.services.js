@@ -1,5 +1,9 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const fs = require("node:fs/promises");
+const path = require("node:path");
+const gravatar = require("gravatar");
+const Jimp = require("jimp");
 
 const { HttpError } = require("../utils/HttpError");
 
@@ -14,32 +18,44 @@ async function registerServices(body) {
     throw new HttpError(409, "Email in use");
   }
 
+  const avatarURL = gravatar.url(email, { s: "200", r: "pg", d: "mp" });
+
   const passwordHash = await bcrypt.hash(password, 10);
 
-  return await User.create({ email, password: passwordHash, subscription });
+  return await User.create({
+    email,
+    password: passwordHash,
+    subscription,
+    avatarURL,
+  });
 }
 
 async function loginServices(body) {
   const { email, password } = body;
 
-  const user = await User.findOne({ email });
-  if (!user) {
+  const user = await User.findOne({ email }).exec();
+
+  if (!user || user === null) {
     throw new HttpError(401, "Email or password is wrong");
   }
 
   const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) {
+
+  if (!isMatch || isMatch === false) {
     throw new HttpError(401, "Email or password is wrong");
   }
 
-  const payload = {
-    id: user._id,
-  };
+  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    expiresIn: "1h",
+  });
 
-  const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
+  const currentUser = await User.findByIdAndUpdate(user._id, { token }).exec();
 
-  const currentUser = await User.findByIdAndUpdate(user._id, { token });
-  return currentUser;
+  if (!currentUser) {
+    throw new HttpError(500, "Failed to update token");
+  }
+
+  return { currentUser, token };
 }
 
 async function logoutServices(id) {
@@ -56,9 +72,40 @@ async function getCurrentServices(user) {
   return currentUser;
 }
 
+async function uploadAvatarServices(user, file) {
+  const { path: tempPath, filename } = file;
+  const { id } = user;
+
+  await Jimp.read(tempPath)
+    .then((image) => image.resize(250, 250).writeAsync(tempPath))
+    .catch(() => {
+      throw new HttpError(400, "Invalid image format");
+    });
+
+  const updatedUser = await User.findByIdAndUpdate(
+    id,
+    {
+      avatarURL: `avatars/${filename}`,
+    },
+    { new: true }
+  ).exec();
+
+  if (!updatedUser || updatedUser === null) {
+    throw new HttpError(401, "Not authorized");
+  }
+
+  await fs.rename(
+    tempPath,
+    path.join(__dirname, "..", "public/avatars", filename)
+  );
+
+  return updatedUser;
+}
+
 module.exports = {
   registerServices,
   loginServices,
   logoutServices,
   getCurrentServices,
+  uploadAvatarServices,
 };
