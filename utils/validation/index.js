@@ -3,10 +3,14 @@ const {
   updateContactStatusValidationSchemas,
 } = require("./contactsValidationSchemas");
 
-const { userValidationSchema } = require("./userValidationSchemas");
+const {
+  userValidationSchema,
+  userVerifyValidationSchemas,
+} = require("./userValidationSchemas");
 
 module.exports = {
   contactValidationSchema,
   updateContactStatusValidationSchemas,
   userValidationSchema,
+  userVerifyValidationSchemas,
 };
