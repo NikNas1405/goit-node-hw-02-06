@@ -5,6 +5,8 @@ const {
   logoutServices,
   getCurrentServices,
   uploadAvatarServices,
+  verifyUserServices,
+  resendEmailVerificationService,
 } = require("../services/users.services");
 
 const register = controllerWrapper(async (req, res, next) => {
@@ -51,10 +53,26 @@ const uploadAvatar = controllerWrapper(async (req, res, next) => {
   });
 });
 
+const verify = controllerWrapper(async (req, res, next) => {
+  const { verificationToken } = req.params;
+
+  await verifyUserServices(verificationToken);
+
+  res.status(200).json({ message: "Verification successful" });
+});
+
+const resendEmailVerify = controllerWrapper(async (req, res, next) => {
+  const { email } = req.body;
+  await resendEmailVerificationService(email);
+  res.status(200).json({ message: "Verification email sent" });
+});
+
 module.exports = {
   register,
   login,
   logout,
   getCurrent,
   uploadAvatar,
+  verify,
+  resendEmailVerify,
 };

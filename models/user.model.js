@@ -17,9 +17,14 @@ const userSchema = new Schema(
       default: "starter",
     },
     token: String,
-    avatarURL: {
+    avatarURL: String,
+    verify: {
+      type: Boolean,
+      default: false,
+    },
+    verificationToken: {
       type: String,
-      // default: "",
+      required: [true, "Verify token is required"],
     },
   },
   {

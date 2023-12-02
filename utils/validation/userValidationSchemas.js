@@ -11,4 +11,13 @@ const userValidationSchema = Joi.object({
   subscription: Joi.string().valid("starter", "pro", "business"),
 });
 
-module.exports = { userValidationSchema };
+const userVerifyValidationSchemas = Joi.object({
+  email: Joi.string()
+    .email({
+      minDomainSegments: 2,
+      tlds: { allow: ["com", "net", "uk", "ua"] },
+    })
+    .required(),
+});
+
+module.exports = { userValidationSchema, userVerifyValidationSchemas };

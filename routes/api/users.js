@@ -2,7 +2,10 @@ const express = require("express");
 
 const AuthUserController = require("../../controllers/users.controllers");
 const { validateBody } = require("../../utils/validateBody");
-const { userValidationSchema } = require("../../utils/validation");
+const {
+  userValidationSchema,
+  userVerifyValidationSchemas,
+} = require("../../utils/validation");
 const router = express.Router();
 
 const jsonParser = express.json();
@@ -33,6 +36,15 @@ router.patch(
   upload.single("avatarURL"),
   userMiddleware,
   AuthUserController.uploadAvatar
+);
+
+router.get("/verify/:verificationToken", AuthUserController.verify);
+
+router.post(
+  "/verify",
+  validateBody(userVerifyValidationSchemas),
+  jsonParser,
+  AuthUserController.resendEmailVerify
 );
 
 module.exports = { authRouter: router };
